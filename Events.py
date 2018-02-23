@@ -47,7 +47,7 @@ upDown_ori_cap = 5
 frontBack_acceleration = 0
 frontBack_keyHold = 0
 frontBack_cam = -5
-frontBack_cam_cap = 0.1
+frontBack_cam_cap = 0.5
 frontBack_pos_cap = 0.1
 frontBack_ori_cap = 5
 
@@ -57,6 +57,8 @@ SHOW = 0
 FADE = 1
 HIDE = 2
 showGround = True
+
+k = 0
 
 def manage():
 
@@ -81,6 +83,7 @@ def manage():
     global frontBack_keyHold
     global frontBack_cam
 
+    global k
 
     dt = time.clock() - lastTime
     lastTime = time.clock()
@@ -214,6 +217,6 @@ def manage():
 
     """ Apply camera control """
     frontBack_cam += frontBack_acceleration*frontBack_cam_cap*k
-    leftRight_cam += leftRight_acceleration*upDown_cam_cap*k
-    upDown_cam += upDown_acceleration*leftRight_cam_cap*k
+    leftRight_cam += leftRight_acceleration*leftRight_cam_cap*k
+    upDown_cam += upDown_acceleration*upDown_cam_cap*k
         

@@ -49,6 +49,12 @@ class mesh(object):
         self.surfIndexOffset = None
         self.edgeIndexOffset = None
 
+        #self.surfColor = np.array([0.5,0.,1,0.05], dtype = np.float32)
+        #self.edgeColor = np.array([0.5,0.,1,0.2], dtype = np.float32)
+        self.surfColor = np.array([0,0.5,0,0.15], dtype = np.float32)
+        self.edgeColor = np.array([0,1,0,0.2], dtype = np.float32)
+        self.modelMatrix = Definitions.I
+
     
     def twistVBO(self, angleTwist = 0):
         vertices = self.defaultVertices.copy()
@@ -115,11 +121,18 @@ def VBO_cone(iMax = 8):
     
     return storeVertices(vertices, edgeIndices, surfIndices, GL_TRIANGLES, GL_LINES)
 
-def VBO_dashed():
+def VBO_dashed(N = 3):
     """ Create the "dashed" VBO & EBO """
-    vertices = [-5/10.,0,0] + [-3/10.,0,0] + [-1/10.,0,0] + [1/10.,0,0] + [3/10.,0,0] + [5/10.,0,0]
-    edgeIndices = [0,1, 2,3, 4,5]
-    surfIndices = [0,1, 2,3, 4,5]
+    vertices = []
+    edgeIndices = []
+    surfIndices = []
+    for n in range(0,N):
+        vertices += [-0.5 + 2*n/(2.*N-1),0,0] + [-0.5 + (2*n+1)/(2.*N-1),0,0]
+        edgeIndices += [2*n, 2*n+1]
+        surfIndices += [2*n, 2*n+1]
+    #vertices = [-5/10.,0,0] + [-3/10.,0,0] + [-1/10.,0,0] + [1/10.,0,0] + [3/10.,0,0] + [5/10.,0,0]
+    #edgeIndices = [0,1, 2,3, 4,5]
+    #surfIndices = [0,1, 2,3, 4,5]
     
     return storeVertices(vertices, edgeIndices, surfIndices, GL_LINES, GL_LINES)
     
@@ -242,16 +255,16 @@ def VBO_maze():
     vertices = []
     edgeIndices = []
     surfIndices = []
-    R = 0.95
+    R = 0.95#0.95
     offset = 0
     for x in range(0,Maze.X+1):
         for y in range(0,Maze.Y):
             for z in range(0,Maze.Z):
                 if Maze.Xwall[x][y][z] == True:
-                    vertices = vertices + [0 + x - (Maze.X)/2., -0.5*R + y - (Maze.Y -1)/2., -0.5*R + z - (Maze.Z - 1)/2.]
-                    vertices = vertices + [0 + x - (Maze.X)/2., -0.5*R + y - (Maze.Y -1)/2.,  0.5*R + z - (Maze.Z - 1)/2.]
-                    vertices = vertices + [0 + x - (Maze.X)/2.,  0.5*R + y - (Maze.Y -1)/2.,  0.5*R + z - (Maze.Z - 1)/2.]
-                    vertices = vertices + [0 + x - (Maze.X)/2.,  0.5*R + y - (Maze.Y -1)/2., -0.5*R + z - (Maze.Z - 1)/2.]
+                    vertices = vertices + [(0 + x - (Maze.X)/2.)/(Maze.X), (-0.5*R + y - (Maze.Y -1)/2.)/(Maze.Y), (-0.5*R + z - (Maze.Z - 1)/2.)/(Maze.Z)]
+                    vertices = vertices + [(0 + x - (Maze.X)/2.)/(Maze.X), (-0.5*R + y - (Maze.Y -1)/2.)/(Maze.Y), ( 0.5*R + z - (Maze.Z - 1)/2.)/(Maze.Z)]
+                    vertices = vertices + [(0 + x - (Maze.X)/2.)/(Maze.X), ( 0.5*R + y - (Maze.Y -1)/2.)/(Maze.Y), ( 0.5*R + z - (Maze.Z - 1)/2.)/(Maze.Z)]
+                    vertices = vertices + [(0 + x - (Maze.X)/2.)/(Maze.X), ( 0.5*R + y - (Maze.Y -1)/2.)/(Maze.Y), (-0.5*R + z - (Maze.Z - 1)/2.)/(Maze.Z)]
 
                     edgeIndices = edgeIndices + [offset + 0, offset + 1]
                     edgeIndices = edgeIndices + [offset + 1, offset + 2]
@@ -267,10 +280,10 @@ def VBO_maze():
         for y in range(0,Maze.Y+1):
             for z in range(0,Maze.Z):
                 if Maze.Ywall[x][y][z] == True:
-                    vertices = vertices + [-0.5*R + x - (Maze.X - 1)/2., 0 + y - (Maze.Y)/2., -0.5*R + z - (Maze.Z - 1)/2.]
-                    vertices = vertices + [ 0.5*R + x - (Maze.X - 1)/2., 0 + y - (Maze.Y)/2., -0.5*R + z - (Maze.Z - 1)/2.]
-                    vertices = vertices + [ 0.5*R + x - (Maze.X - 1)/2., 0 + y - (Maze.Y)/2.,  0.5*R + z - (Maze.Z - 1)/2.]
-                    vertices = vertices + [-0.5*R + x - (Maze.X - 1)/2., 0 + y - (Maze.Y)/2.,  0.5*R + z - (Maze.Z - 1)/2.]
+                    vertices = vertices + [(-0.5*R + x - (Maze.X - 1)/2.)/(Maze.X), (0 + y - (Maze.Y)/2.)/(Maze.Y), (-0.5*R + z - (Maze.Z - 1)/2.)/(Maze.Z)]
+                    vertices = vertices + [( 0.5*R + x - (Maze.X - 1)/2.)/(Maze.X), (0 + y - (Maze.Y)/2.)/(Maze.Y), (-0.5*R + z - (Maze.Z - 1)/2.)/(Maze.Z)]
+                    vertices = vertices + [( 0.5*R + x - (Maze.X - 1)/2.)/(Maze.X), (0 + y - (Maze.Y)/2.)/(Maze.Y), ( 0.5*R + z - (Maze.Z - 1)/2.)/(Maze.Z)]
+                    vertices = vertices + [(-0.5*R + x - (Maze.X - 1)/2.)/(Maze.X), (0 + y - (Maze.Y)/2.)/(Maze.Y), ( 0.5*R + z - (Maze.Z - 1)/2.)/(Maze.Z)]
 
                     edgeIndices = edgeIndices + [offset + 0, offset + 1]
                     edgeIndices = edgeIndices + [offset + 1, offset + 2]
@@ -286,10 +299,10 @@ def VBO_maze():
         for y in range(0,Maze.Y):
             for z in range(0,Maze.Z+1):
                 if Maze.Zwall[x][y][z] == True:
-                    vertices = vertices + [-0.5*R + x - (Maze.X - 1)/2., -0.5*R + y - (Maze.Y -1)/2., 0 + z - (Maze.Z)/2.]
-                    vertices = vertices + [-0.5*R + x - (Maze.X - 1)/2.,  0.5*R + y - (Maze.Y -1)/2., 0 + z - (Maze.Z)/2.]
-                    vertices = vertices + [ 0.5*R + x - (Maze.X - 1)/2.,  0.5*R + y - (Maze.Y -1)/2., 0 + z - (Maze.Z)/2.]
-                    vertices = vertices + [ 0.5*R + x - (Maze.X - 1)/2., -0.5*R + y - (Maze.Y -1)/2., 0 + z - (Maze.Z)/2.]
+                    vertices = vertices + [(-0.5*R + x - (Maze.X - 1)/2.)/(Maze.X), (-0.5*R + y - (Maze.Y -1)/2.)/(Maze.Y), (0 + z - (Maze.Z)/2.)/(Maze.Z)]
+                    vertices = vertices + [(-0.5*R + x - (Maze.X - 1)/2.)/(Maze.X), ( 0.5*R + y - (Maze.Y -1)/2.)/(Maze.Y), (0 + z - (Maze.Z)/2.)/(Maze.Z)]
+                    vertices = vertices + [( 0.5*R + x - (Maze.X - 1)/2.)/(Maze.X), ( 0.5*R + y - (Maze.Y -1)/2.)/(Maze.Y), (0 + z - (Maze.Z)/2.)/(Maze.Z)]
+                    vertices = vertices + [( 0.5*R + x - (Maze.X - 1)/2.)/(Maze.X), (-0.5*R + y - (Maze.Y -1)/2.)/(Maze.Y), (0 + z - (Maze.Z)/2.)/(Maze.Z)]
 
                     edgeIndices = edgeIndices + [offset + 0, offset + 1]
                     edgeIndices = edgeIndices + [offset + 1, offset + 2]

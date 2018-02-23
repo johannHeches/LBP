@@ -1,4 +1,4 @@
-
+import copy
 from ctypes import *
 import math
 import numpy as np
@@ -14,10 +14,10 @@ import sys
 import time
 
 import Definitions
+import Entity
 import Events
 import Graphics
 import Maze
-import Scene
 import Shaders
 
 
@@ -81,6 +81,7 @@ class mainWindow(QtWidgets.QMainWindow):
         """
             update camera
         """
+
         Definitions.viewMatrix.push()
         Definitions.viewMatrix.translate(0,0,Events.frontBack_cam)
         Definitions.viewMatrix.rotate(Events.upDown_cam, 1, 0, 0)
@@ -103,10 +104,48 @@ class mainWindow(QtWidgets.QMainWindow):
         
         # draw scene
         Graphics.modelView(Graphics.blending)
-        Maze.drawMaze()
-        #Scene.drawScene()
+        Definitions.modelMatrix.push()
+        Definitions.modelMatrix.rotate(90, 0, 0, 1)
+        Entity.virtuEarth.mesh.modelMatrix = Definitions.modelMatrix.peek()
+        Definitions.modelMatrix.pop()
+        Entity.drawEntity(Entity.virtuEarth)
 
         
+        Graphics.modelView(Graphics.opaque)
+        Definitions.modelMatrix.push()
+        Definitions.modelMatrix.scale(0.1, 0.1, 0.1)
+        Definitions.modelMatrix.rotate(-Events.leftRight_cam, 0, 1, 0)
+        Definitions.modelMatrix.rotate(-Events.upDown_cam, 1, 0, 0)
+        Definitions.modelMatrix.translate(0,0,5)
+        Definitions.modelMatrix.rotate(-90, 0, 1, 0)
+        Definitions.modelMatrix.scale(1, 2, 2)
+        Entity.virtuShip.mesh.modelMatrix = Definitions.modelMatrix.peek()
+        Definitions.modelMatrix.pop()
+        Entity.drawEntity(Entity.virtuShip)
+
+        Graphics.modelView(Graphics.opaque)
+        Definitions.modelMatrix.push()
+        Definitions.modelMatrix.rotate(-90, 0, 1, 0)
+        Definitions.modelMatrix.translate(0.5,0,0)
+        Definitions.modelMatrix.scale(3, 3, 3)
+        Definitions.modelMatrix.translate(0.5,0,0)
+        Entity.virtuPath.mesh.modelMatrix = Definitions.modelMatrix.peek()
+        Definitions.modelMatrix.pop()
+        Entity.virtuPath.mesh.surfColor = np.array([0.5*math.cos(time.clock()),0.5*math.cos(time.clock() + math.pi*2/3),0.5*math.cos(time.clock() + math.pi*4/3),0.15], dtype = np.float32)
+        Entity.virtuPath.mesh.edgeColor = np.array([1*math.cos(time.clock()),1*math.cos(time.clock() + math.pi*2/3),1*math.cos(time.clock() + math.pi*4/3),0.15], dtype = np.float32)
+        Entity.drawEntity(Entity.virtuPath)
+        
+        Graphics.modelView(Graphics.opaque)
+        Definitions.modelMatrix.push()
+        Definitions.modelMatrix.translate(0,0,0.5)
+        Definitions.modelMatrix.scale(3, 3, 3)
+        Definitions.modelMatrix.translate(0,0,1)
+        Definitions.modelMatrix.scale(1/15., 1/15., 1/15.)
+        Definitions.modelMatrix.rotate(90, 0, 1, 0)
+        Entity.virtuAsteroid.mesh.modelMatrix = Definitions.modelMatrix.peek()
+        Definitions.modelMatrix.pop()
+        Entity.drawEntity(Entity.virtuAsteroid)
+
         print("FREQ : ", int(1./(time.clock()-flagStart)))
 
 
@@ -204,13 +243,33 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     Maze.mazeInit()
     
-    Maze.virtuMaze = Maze.maze()
-    Maze.virtuMaze.mesh = Graphics.VBO_maze()
-    Graphics.buildVBO(Maze.virtuMaze)
+    Entity.virtuEarth = Entity.entity()
+    Entity.virtuEarth.mesh = Graphics.VBO_sphere()
+    Graphics.buildVBO(Entity.virtuEarth)
+    Entity.virtuEarth.mesh.surfColor = np.array([0, 0, 0.5, 0.15], dtype = np.float32)
+    Entity.virtuEarth.mesh.edgeColor = np.array([0, 0, 1, 0.15], dtype = np.float32)
     
-    Scene.tile = Scene.characteristics(1.7)
-    Scene.tile.mesh = Graphics.VBO_cube()
-    Graphics.buildVBO(Scene.tile)
+    
+    Entity.virtuShip = Entity.entity()
+    Entity.virtuShip.mesh = Graphics.VBO_circle()
+    Graphics.buildVBO(Entity.virtuShip)
+    Entity.virtuShip.mesh.surfColor = np.array([0.5, 0.5, 0.5, 0.15], dtype = np.float32)
+    Entity.virtuShip.mesh.edgeColor = np.array([1, 1, 1, 0.15], dtype = np.float32)
+        
+    
+    Entity.virtuPath = Entity.entity()
+    Entity.virtuPath.mesh = Graphics.VBO_dashed(10)
+    Graphics.buildVBO(Entity.virtuPath)
+    Entity.virtuPath.mesh.surfColor = np.array([0.5, 0, 0, 0.15], dtype = np.float32)
+    Entity.virtuPath.mesh.edgeColor = np.array([1, 0, 0, 0.15], dtype = np.float32)
+
+
+    
+    Entity.virtuAsteroid = Entity.entity()
+    Entity.virtuAsteroid.mesh = Graphics.VBO_maze()
+    Graphics.buildVBO(Entity.virtuAsteroid)
+    Entity.virtuAsteroid.mesh.surfColor = np.array([0.35, 0.08, 0.02, 0.15], dtype = np.float32)
+    Entity.virtuAsteroid.mesh.edgeColor = np.array([0.65, 0.15, 0.04, 0.15], dtype = np.float32)
 
 
     """ 3D Scene """

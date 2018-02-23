@@ -1,14 +1,3 @@
-class tile(object):
-    """
-        characteristics
-        .o      rotation angle
-        .xyz    rotation axis
-    """
-
-
-    def __init__(self):
-        self.wall = [False, False, False, False]
-
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.arrays import vbo
@@ -20,9 +9,9 @@ import random
 import Definitions
 import Shaders
 
-X = 20
-Y = 20
-Z = 20
+X = 10
+Y = 10
+Z = 10
 Xwall = []
 Ywall = []
 Zwall = []
@@ -47,7 +36,7 @@ def mazeInit():
     room[E[0]][E[1]][E[2]] = True
     genPath(S,E)
     
-    for i in range(0,100):
+    for i in range(0,10000):
         I = chooseRandomRoom(False)
         F = chooseRandomRoom(True)
         if I[0] == -1 or F[0] == -1:
@@ -83,6 +72,7 @@ def chooseRandomRoom(used):
 def genPath(S,E):
     if S[0] == E[0] and S[1] == E[1] and S[2] == E[2]:
         return
+
     choose = []
     if S[0] != E[0]:
         choose = choose + [0,]
@@ -114,6 +104,9 @@ def genPath(S,E):
             Zwall[S[0]][S[1]][S[2]] = False
             S[2] = S[2] - 1
 
+    #if room[S[0]][S[1]][S[2]] == True:
+    #    return
+
     room[S[0]][S[1]][S[2]] = True
     genPath(S,E)
 
@@ -141,53 +134,3 @@ def breakWalls():
                     if z+1 < Z and room[x][y][z+1] == False:
                         Zwall[x][y][z+1] = False
 
-
-virtuMaze = None
-class maze(object):
-    """
-        maze
-        .o      rotation angle
-        .xyz    rotation axis
-    """
-
-
-    def __init__(self, ini = 1.70): # add orientation here or keep it on origin limb ?
-        self.mesh = None
-
-def drawMaze():
-    
-    
-    """ bind surfaces vbo """
-    virtuMaze.mesh.surfIndexPositions.bind()
-    virtuMaze.mesh.vertexPositions.bind()
-    glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
-
-    """ choose color """
-    color = np.array([0.5,0.,1,0.05], dtype = np.float32)
-
-    """ send color to shader """
-    glUniform4fv(Shaders.setColor_loc, 1, color)
-
-    """ send matrix to shader """
-    glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, Definitions.I)
-
-    """ draw vbo """
-    glDrawElements(virtuMaze.mesh.surfStyleIndex, virtuMaze.mesh.surfNbIndex, GL_UNSIGNED_INT, None)
-        
-
-    """ bind edges vbo """
-    virtuMaze.mesh.edgeIndexPositions.bind()
-    virtuMaze.mesh.vertexPositions.bind()
-    glVertexAttribPointer(Shaders.position, 3, GL_FLOAT, GL_FALSE, 0, None)
-
-    """ choose color """
-    color = np.array([0.5,0.,1,0.2], dtype = np.float32)
-
-    """ send color to shader """
-    glUniform4fv(Shaders.setColor_loc, 1, color)
-
-    """ send matrix to shader """
-    glUniformMatrix4fv(Shaders.model_loc, 1, GL_FALSE, Definitions.I)
-
-    """ draw vbo """
-    glDrawElements(virtuMaze.mesh.edgeStyleIndex, virtuMaze.mesh.edgeNbIndex, GL_UNSIGNED_INT, None)
